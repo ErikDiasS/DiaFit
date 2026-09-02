@@ -22,3 +22,17 @@ class User(AbstractUser):
         choices=TIPOS_USUARIO,
         default=TIPO_ALUNO,
     )
+class ProfessorAluno(models.Model):
+
+    professor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='alunos'
+)
+    aluno = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name= 'professor',
+        null=True,
+        blank=True
+    )
