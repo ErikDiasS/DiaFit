@@ -3,7 +3,7 @@
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.core.exceptions import ValidationError
 
 class User(AbstractUser):
 
@@ -36,3 +36,19 @@ class ProfessorAluno(models.Model):
         null=True,
         blank=True
     )
+    #valida o tipo de usuario se é professor ou aluno
+    def clean(self):
+        if self.professor.tipo_usuario != User.TIPO_PROFESSOR:
+            raise ValidationError(
+                'O usuário selecionado como professor deve ser um PROFESSOR'
+            )
+
+        if self.aluno and self.aluno.tipo_usuario != User.TIPO_ALUNO:
+            raise ValidationError(
+                'O usuário selecionado como aluno deve ser um ALUNO'
+
+            )
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+        
