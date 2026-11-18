@@ -13,13 +13,25 @@ from django.core.exceptions import ValidationError
 class User(AbstractUser):
 
     # Define os tipos de usuários permitidos no Dia Fit.
+
+    # Perfil destinado às pessoas que utilizam a academia para treinar.
     TIPO_ALUNO = 'ALUNO'
+
+    # Perfil destinado aos profissionais que acompanham os alunos
+    # e elaboram seus planos de treinamento.
     TIPO_PROFESSOR = 'PROFESSOR'
 
-    # Relaciona o valor armazenado no banco com o nome exibido no sistema.
+    # Perfil destinado à gestão da academia.
+    # A gestora poderá acompanhar todos os usuários e treinos.
+    TIPO_GESTOR = 'GESTOR'
+
+    # Lista de opções disponíveis para o campo tipo_usuario.
+    # O primeiro valor é armazenado no banco de dados.
+    # O segundo valor é apresentado no Django Admin.
     TIPOS_USUARIO = [
         (TIPO_ALUNO, 'Aluno'),
         (TIPO_PROFESSOR, 'Professor'),
+        (TIPO_GESTOR, 'Gestor'),
     ]
 
     # Cria um campo para identificar se o usuário é aluno ou professor.
@@ -53,7 +65,7 @@ class ProfessorAluno(models.Model):
         blank=True
     )
 
-    # Configura como o modelo será apresentado no Django Admin.
+    # Configura as opções e regras do modelo.
     class Meta:
 
         # Nome apresentado quando o modelo estiver no singular.
@@ -62,7 +74,18 @@ class ProfessorAluno(models.Model):
         # Nome apresentado quando o modelo estiver no plural.
         verbose_name_plural = 'Professores e alunos'
 
-    # Verifica se os usuários selecionados possuem os tipos corretos.
+        # Impede que o mesmo professor seja vinculado
+        # mais de uma vez ao mesmo aluno.
+        #
+        # Permite que um aluno tenha vários professores
+        # e que um professor acompanhe vários alunos.
+        constraints = [
+            models.UniqueConstraint(
+                fields=['professor', 'aluno'],
+                name='unique_professor_aluno'
+            )
+        ]
+    #Verifica se os usuários selecionados possuem os tipos corretos.
     def clean(self):
 
         # Confere se o usuário escolhido como professor
